@@ -9,6 +9,8 @@ import static org.junit.Assert.assertEquals;
 
 public class CheckoutTest {
 
+    private static final int INVALID = -1;
+
     enum Item {
         A, B, C, D
     }
@@ -47,6 +49,12 @@ public class CheckoutTest {
     public void trims_whitespace_around_sku() {
         int price = Checkout.checkout(" A , A ");
         assertEquals(100, price);
+    }
+
+    @Test
+    public void returns_negative_one_for_null_input() {
+        int price = Checkout.checkout(null);
+        assertEquals(INVALID, price);
     }
 
     private String serialize(Item... items) {
