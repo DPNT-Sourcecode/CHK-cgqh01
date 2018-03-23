@@ -62,9 +62,7 @@ public class Checkout {
                             price = price + deal.dealPriceInWholePounts;
                             long criterionItemsLeft = itemCounts.get(deal.criterionItem) - deal.criterionItemQuantity;
                             itemCounts.put(deal.criterionItem, criterionItemsLeft);
-                            if (deal.criterionItem != item) {
-                                itemCounts.put(item, itemCounts.get(item) - deal.applicableItemQuantity);
-                            }
+                            itemCounts.put(item, itemCounts.get(item) - deal.applicableItemQuantity);
                         } else {
                             price = price + item.priceInWholePounds * currentNumberOfItems;
                             itemCounts.put(item, 0L);
