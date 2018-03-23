@@ -15,8 +15,9 @@ public class Checkout {
     private static final Item B = new Item("B", 30);
     private static final Item C = new Item("C", 20);
     private static final Item D = new Item("D", 15);
+    private static final Item E = new Item("E", 40);
 
-    private static final List<Item> items = Arrays.asList(A, B, C, D);
+    private static final List<Item> items = Arrays.asList(A, B, C, D, E);
 
     private static final Map<String, Item> itemsBySku = items
             .stream()

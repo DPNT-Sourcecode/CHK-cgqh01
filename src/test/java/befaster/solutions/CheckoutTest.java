@@ -12,7 +12,7 @@ public class CheckoutTest {
     private static final int INVALID = -1;
 
     enum Item {
-        A, B, C, D, E
+        A, B, C, D, E, Z
     }
 
     @Test
@@ -59,13 +59,13 @@ public class CheckoutTest {
 
     @Test
     public void returns_negative_one_for_invalid_item() {
-        int price = Checkout.checkout(serialize(Item.E));
+        int price = Checkout.checkout(serialize(Item.Z));
         assertEquals(INVALID, price);
     }
 
     @Test
     public void returns_negative_one_if_any_item_is_invalid() {
-        int price = Checkout.checkout(serialize(Item.A, Item.E));
+        int price = Checkout.checkout(serialize(Item.A, Item.Z));
         assertEquals(INVALID, price);
     }
 
@@ -87,11 +87,16 @@ public class CheckoutTest {
         assertEquals(130 + 50, price);
     }
 
-
     @Test
     public void two_B_gets_special_price() {
         int price = Checkout.checkout(serialize(Item.B, Item.B));
         assertEquals(45, price);
+    }
+
+    @Test
+    public void can_buy_one_E() {
+        int price = Checkout.checkout(serialize(Item.E));
+        assertEquals(40, price);
     }
 
     private String serialize(Item... items) {
