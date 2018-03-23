@@ -131,11 +131,10 @@ public class CheckoutTest {
     }
 
     @Test
-    public void testCase() {
-        int price = Checkout.checkout("CCADDEEBBA");
-        assertEquals(280, price);
-   }
-
+    public void two_E_and_two_B_only_get_one_B_free() {
+        int price = Checkout.checkout(serialize(Item.E, Item.E, Item.B, Item.B));
+        assertEquals(40 * 2 + 30, price);
+    }
 
     @Test
     public void four_E_gets_two_B_free() {
