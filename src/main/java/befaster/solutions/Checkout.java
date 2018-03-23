@@ -23,8 +23,9 @@ public class Checkout {
     private static final Deal threeAsFor130 = new Deal(A, 3, 130, A);
     private static final Deal fiveAsFor200 = new Deal(A, 5, 200, A);
     private static final Deal twoBFor45 = new Deal(B, 2, 45, B);
+    private static final Deal twoEGetsAFreeB = new Deal(E, 2, 0, B);
 
-    private static final List<Deal> deals = Arrays.asList(threeAsFor130, fiveAsFor200, twoBFor45);
+    private static final List<Deal> deals = Arrays.asList(threeAsFor130, fiveAsFor200, twoBFor45, twoEGetsAFreeB);
 
     private static final Map<String, List<Deal>> dealsBySku = deals.stream()
             .collect(Collectors.groupingBy(d -> d.criterionItem.sku));
@@ -37,12 +38,11 @@ public class Checkout {
 
     private static int getPrice(List<Item> items) {
 
-        Map<Item, Long> itemCounts = items.stream().collect(Collectors.groupingBy(i -> i, Collectors.counting()));
-
-        return itemCounts.keySet()
+        Map<Item, Long> originalItemCounts = items.stream().collect(Collectors.groupingBy(i -> i, Collectors.counting()));
+        return originalItemCounts.keySet()
                 .stream()
                 .mapToInt(item -> {
-                    int numberOfItems = itemCounts.get(item).intValue();
+                    int numberOfItems = originalItemCounts.get(item).intValue();
                     List<Deal> deals = dealsBySku.getOrDefault(item.sku, Collections.emptyList());
 
                     int price = 0;
@@ -50,7 +50,7 @@ public class Checkout {
                         int currentNumberOfItems = numberOfItems;
 
                         Map<Double, Deal> dealsByValue = deals.stream()
-                                .filter(deal -> deal.criterionItemQuantity <= currentNumberOfItems)
+                                .filter(deal -> dealAppliesTo(deal, item, currentNumberOfItems, originalItemCounts))
                                 .collect(Collectors.toMap(d -> d.dealPriceInWholePounts * 1.0 / d.criterionItemQuantity, d -> d));
 
                         OptionalDouble maybeBestDealValue = dealsByValue.keySet()
@@ -74,24 +74,10 @@ public class Checkout {
 
     }
 
-    private static boolean dealAppliesToItems(Deal deal, Map<Item, Long> itemsBySku) {
-        return itemsBySku.containsKey(deal.criterionItem) && itemsBySku.get(deal.criterionItem) >= deal.criterionItemQuantity;
-    }
-
-    private static class DealApplicationReport {
-        private final Map<Item, Long> itemsAfterDeal;
-        private final int dealReduction;
-
-        private DealApplicationReport(Map<Item, Long> itemsAfterDeal, int dealReduction) {
-            this.itemsAfterDeal = itemsAfterDeal;
-            this.dealReduction = dealReduction;
-        }
-    }
-
-    private static int getPriceUsingDeal(Item item, int numberOfItems, Deal dealToApply) {
-        int numberOfTimesDealIsMet = numberOfItems / dealToApply.criterionItemQuantity;
-        int numberOfItemsNotInDeal = numberOfItems % dealToApply.criterionItemQuantity;
-        return numberOfTimesDealIsMet * dealToApply.dealPriceInWholePounts + numberOfItemsNotInDeal * item.priceInWholePounds;
+    private static boolean dealAppliesTo(Deal deal, Item item, int itemCount, Map<Item, Long> originalItemCounts) {
+        return deal.itemForDealPrice.equals(item) &&
+                itemCount > 0 &&
+                originalItemCounts.get(deal.criterionItem) >= deal.criterionItemQuantity;
     }
 
     private static Optional<List<Item>> convertToValidItems(String skus) {
