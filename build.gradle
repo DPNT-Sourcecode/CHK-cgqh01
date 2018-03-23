@@ -1,0 +1,50 @@
+apply plugin: 'java'
+
+//noinspection GroovyUnusedAssignment
+sourceCompatibility = 1.8
+group 'io.befaster'
+
+repositories {
+    mavenCentral()
+
+    maven {
+        url  "http://dl.bintray.com/julianghionoiu/maven"
+    }
+}
+
+dependencies {
+    //TODO Don't forget to also update the Maven pom.xml
+    compile 'ro.ghionoiu:tdl-client-java:0.20.3'
+    compile 'com.mashape.unirest:unirest-java:1.4.9'
+    compile 'com.google.guava:guava:18.0'
+
+
+    testCompile ('junit:junit:4.12') {
+        exclude module : 'hamcrest-core'
+    }
+    testCompile ('org.mockito:mockito-core:1.10.19') {
+        exclude module : 'hamcrest-core'
+    }
+    testCompile 'org.hamcrest:hamcrest-all:1.3'
+}
+
+// Making the app runnable
+
+apply plugin: 'application'
+
+mainClassName = 'befaster.SendCommandToServer'
+
+run {
+    standardInput = System.in
+
+    def action = System.getProperty('action')
+    def actions = (action == null) ? [] : [ action ]
+    //noinspection GroovyAssignabilityCheck
+    args(actions)
+}
+
+jar {
+    manifest {
+        attributes 'Main-Class': mainClassName
+    }
+}
