@@ -21,14 +21,13 @@ public class Checkout {
             .stream()
             .collect(Collectors.toMap(i -> i.sku, i -> i));
 
-    private static final Deal threeAsFor130 = new Deal(A, 3, A, 130, 3);
-    private static final Deal fiveAsFor200 = new Deal(A, 5, A, 200, 5);
-    private static final Deal twoBFor45 = new Deal(B, 2, B, 45, 2);
-    private static final Deal twoEGetsAFreeB = new Deal(E, 2, B, 0, 1);
-    private static final Deal twoFGetOneFree = new Deal(F, 2, F, 0, 1);
+    private static final Deal threeAsFor130 = new Deal(A, 3, A, 130);
+    private static final Deal fiveAsFor200 = new Deal(A, 5, A, 200);
+    private static final Deal twoBFor45 = new Deal(B, 2, B, 45);
+    private static final Deal twoEGetsAFreeB = new Deal(E, 2, B, 0);
+    private static final Deal threeFGetOneFree = new Deal(F, 3, F, 20);
 
-    private static final List<Deal> deals = Arrays.asList(twoFGetOneFree);
-//    private static final List<Deal> deals = Arrays.asList(threeAsFor130, fiveAsFor200, twoBFor45, twoEGetsAFreeB, twoFGetOneFree);
+    private static final List<Deal> deals = Arrays.asList(threeAsFor130, fiveAsFor200, twoBFor45, twoEGetsAFreeB, threeFGetOneFree);
 
     public static Integer checkout(String skus) {
         return Optional.ofNullable(skus)
@@ -63,7 +62,7 @@ public class Checkout {
                             long criterionItemsLeft = itemCounts.get(deal.criterionItem) - deal.criterionItemQuantity;
                             itemCounts.put(deal.criterionItem, criterionItemsLeft);
                             if (deal.criterionItem != item) {
-                                itemCounts.put(item, itemCounts.get(item) - deal.applicableItemQuantity);
+                                itemCounts.put(item, itemCounts.get(item) - 1);
                             }
                         } else {
                             price = price + item.priceInWholePounds * currentNumberOfItems;
@@ -79,7 +78,7 @@ public class Checkout {
 
     private static boolean dealAppliesTo(Deal deal, Item item, int itemCount, Map<Item, Long> originalItemCounts) {
         return deal.applicableItemForDeal.equals(item) &&
-                itemCount >= (item.equals(deal.criterionItem) ? deal.criterionItemQuantity + deal.applicableItemQuantity : deal.applicableItemQuantity) &&
+                itemCount >= (item.equals(deal.criterionItem) ? deal.criterionItemQuantity : 1) &&
                 originalItemCounts.containsKey(deal.criterionItem) &&
                 originalItemCounts.get(deal.criterionItem) >= deal.criterionItemQuantity;
     }
@@ -108,14 +107,12 @@ public class Checkout {
         private final int criterionItemQuantity;
         private final int dealPriceInWholePounts;
         private final Item applicableItemForDeal;
-        private final int applicableItemQuantity;
 
-        private Deal(Item criterionItem, int criterionItemQuantity, Item applicableItemForDeal, int dealPriceInWholePounts, int applicableItemQuantity) {
+        private Deal(Item criterionItem, int criterionItemQuantity, Item applicableItemForDeal, int dealPriceInWholePounts) {
             this.criterionItem = criterionItem;
             this.criterionItemQuantity = criterionItemQuantity;
             this.dealPriceInWholePounts = dealPriceInWholePounts;
             this.applicableItemForDeal = applicableItemForDeal;
-            this.applicableItemQuantity = applicableItemQuantity;
         }
     }
 

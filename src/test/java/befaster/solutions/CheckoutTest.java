@@ -161,6 +161,13 @@ public class CheckoutTest {
         int price = Checkout.checkout(serialize(Item.F, Item.F, Item.F));
         assertEquals(fPrice * 2, price);
     }
+
+    @Test
+    public void can_buy_two_fs() {
+        int price = Checkout.checkout(serialize(Item.F, Item.F));
+        assertEquals(fPrice * 2, price);
+    }
+
     @Test
     public void userAcceptanceTests() {
         assertEquals(280, Checkout.checkout("CCADDEEBBA").intValue());
