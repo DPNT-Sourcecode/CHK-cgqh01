@@ -37,55 +37,41 @@ public class Checkout {
 
     private static int getPrice(List<Item> items) {
 
-        Map<Item, Long> countsPerItem = items.stream().collect(Collectors.groupingBy(i -> i, Collectors.counting()));
+        Map<Item, Long> itemCounts = items.stream().collect(Collectors.groupingBy(i -> i, Collectors.counting()));
 
-        while (System.currentTimeMillis() > 0) {
-            List<Deal> applicableDeals = deals.stream().filter(deal -> dealAppliesToItems(deal, countsPerItem))
-                    .collect(Collectors.toList());
-
-            List<DealApplicationReport> reports = applicableDeals.stream()
-                    .map(deal -> getDealReport(deal, countsPerItem))
-                    .sorted(Comparator.comparingInt(o -> -1 * o.dealReduction))
-                    .collect(Collectors.toList());
-            System.out.println();
-        }
-
-
-
-        Map<Item, Long> numberOfItemsPerSku = items.stream().collect(Collectors.groupingBy(i -> i, Collectors.counting()));
-
-        return numberOfItemsPerSku.keySet()
+        return itemCounts.keySet()
                 .stream()
                 .mapToInt(item -> {
-                    int numberOfItems = numberOfItemsPerSku.get(item).intValue();
-                    if (dealsBySku.containsKey(item.sku)) {
+                    int numberOfItems = itemCounts.get(item).intValue();
+                    List<Deal> deals = dealsBySku.getOrDefault(item.sku, Collections.emptyList());
 
-                        deals.stream().sorted((o1, o2) -> {
-                            double o1PricePerUnit = o1.dealPriceInWholePounts * 1.0 / o1.dealPriceInWholePounts;
-                            double o2PricePerUnit = o2.dealPriceInWholePounts * 1.0 / o2.dealPriceInWholePounts;
-//                            return o1PricePerUnit - o2PricePerUnit;
-                            return 0;
-                        } );
+                    int price = 0;
+                    while (numberOfItems > 0) {
+                        int currentNumberOfItems = numberOfItems;
 
-                        List<Deal> deals = dealsBySku.get(item.sku);
-                        return deals.stream()
-                                .mapToInt(deal -> getPriceUsingDeal(item, numberOfItems, deal))
-                                .min().orElse(0);
+                        Map<Double, Deal> dealsByValue = deals.stream()
+                                .filter(deal -> deal.quantityToQualifyForDeal <= currentNumberOfItems)
+                                .collect(Collectors.toMap(d -> d.dealPriceInWholePounts * 1.0 / d.quantityToQualifyForDeal, d -> d));
 
-                    } else {
-                        return numberOfItems * item.priceInWholePounds;
+                        OptionalDouble maybeBestDealValue = dealsByValue.keySet()
+                                .stream()
+                                .mapToDouble(d -> d)
+                                .min();
+
+                        if (maybeBestDealValue.isPresent()) {
+                            Deal deal = dealsByValue.get(maybeBestDealValue.getAsDouble());
+                            price = price + deal.dealPriceInWholePounts;
+                            numberOfItems = numberOfItems - deal.quantityToQualifyForDeal;
+                        } else {
+                            price = price + item.priceInWholePounds * numberOfItems;
+                            numberOfItems = 0;
+                        }
+
                     }
-
+                    return price;
                 })
                 .sum();
 
-    }
-
-    private static DealApplicationReport getDealReport(Deal deal, Map<Item, Long> itemCounts) {
-        Map<Item, Long> updatedCounts = new HashMap<>(itemCounts);
-        long updatedCountForDealItem = updatedCounts.get(deal.item) - deal.quantityToQualifyForDeal;
-        updatedCounts.put(deal.item, updatedCountForDealItem);
-        return new DealApplicationReport(updatedCounts, deal.dealPriceInWholePounts);
     }
 
     private static boolean dealAppliesToItems(Deal deal, Map<Item, Long> itemsBySku) {
