@@ -48,8 +48,7 @@ public class Checkout {
                         int numberOfTimesDealIsMet = numberOfItems / firstDealForSku.quantityToQualifyForDeal;
                         int numberOfItemsNotInDeal = numberOfItems % firstDealForSku.quantityToQualifyForDeal;
                         return numberOfTimesDealIsMet * firstDealForSku.dealPriceInWholePounts + numberOfItemsNotInDeal * item.priceInWholePounds;
-                    }
-                    else {
+                    } else {
                         return numberOfItems * item.priceInWholePounds;
                     }
 
@@ -63,6 +62,7 @@ public class Checkout {
                 .flatMap(delimitedSkus -> {
 
                     List<String> parsedSkus = Arrays.stream(delimitedSkus.split(DELIMITER))
+                            .filter(i -> i.length() != 0)
                             .collect(Collectors.toList());
 
                     boolean allSkusAreValid = parsedSkus.stream().allMatch(itemsBySku::containsKey);
