@@ -149,12 +149,18 @@ public class CheckoutTest {
         assertEquals(ePrice * 4, price);
     }
 
+
     @Test
     public void can_buy_one_F() {
         int price = Checkout.checkout(serialize(Item.F));
         assertEquals(fPrice, price);
     }
 
+    @Test
+    public void can_buy_three_Fs_with_third_one_free() {
+        int price = Checkout.checkout(serialize(Item.F, Item.F, Item.F));
+        assertEquals(fPrice * 2, price);
+    }
     @Test
     public void userAcceptanceTests() {
         assertEquals(280, Checkout.checkout("CCADDEEBBA").intValue());

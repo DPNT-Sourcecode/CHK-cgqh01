@@ -13,19 +13,21 @@ public class Checkout {
     private static final Item C = new Item("C", 20);
     private static final Item D = new Item("D", 15);
     private static final Item E = new Item("E", 40);
+    private static final Item F = new Item("F", 10);
 
-    private static final List<Item> items = Arrays.asList(A, B, C, D, E);
+    private static final List<Item> items = Arrays.asList(A, B, C, D, E, F);
 
     private static final Map<String, Item> itemsBySku = items
             .stream()
             .collect(Collectors.toMap(i -> i.sku, i -> i));
 
-    private static final Deal threeAsFor130 = new Deal(A, 3, 130, A);
-    private static final Deal fiveAsFor200 = new Deal(A, 5, 200, A);
-    private static final Deal twoBFor45 = new Deal(B, 2, 45, B);
-    private static final Deal twoEGetsAFreeB = new Deal(E, 2, 0, B);
+    private static final Deal threeAsFor130 = new Deal(A, 3, A, 130, 3);
+    private static final Deal fiveAsFor200 = new Deal(A, 5, A, 200, 5);
+    private static final Deal twoBFor45 = new Deal(B, 2, B, 45, 2);
+    private static final Deal twoEGetsAFreeB = new Deal(E, 2, B, 0, 1);
+    private static final Deal twoFGetOneFree = new Deal(F, 2, F, 0, 1);
 
-    private static final List<Deal> deals = Arrays.asList(threeAsFor130, fiveAsFor200, twoBFor45, twoEGetsAFreeB);
+    private static final List<Deal> deals = Arrays.asList(threeAsFor130, fiveAsFor200, twoBFor45, twoEGetsAFreeB, twoFGetOneFree);
 
     public static Integer checkout(String skus) {
         return Optional.ofNullable(skus)
@@ -75,7 +77,7 @@ public class Checkout {
     }
 
     private static boolean dealAppliesTo(Deal deal, Item item, int itemCount, Map<Item, Long> originalItemCounts) {
-        return deal.itemForDealPrice.equals(item) &&
+        return deal.applicableItemForDeal.equals(item) &&
                 itemCount >= (item.equals(deal.criterionItem) ? deal.criterionItemQuantity : 1) &&
                 originalItemCounts.containsKey(deal.criterionItem) &&
                 originalItemCounts.get(deal.criterionItem) >= deal.criterionItemQuantity;
@@ -104,13 +106,15 @@ public class Checkout {
         private final Item criterionItem;
         private final int criterionItemQuantity;
         private final int dealPriceInWholePounts;
-        private final Item itemForDealPrice;
+        private final Item applicableItemForDeal;
+        private final int applicableItemQuantity;
 
-        private Deal(Item criterionItem, int criterionItemQuantity, int dealPriceInWholePounts, Item itemForDealPrice) {
+        private Deal(Item criterionItem, int criterionItemQuantity, Item applicableItemForDeal, int dealPriceInWholePounts, int applicableItemQuantity) {
             this.criterionItem = criterionItem;
             this.criterionItemQuantity = criterionItemQuantity;
             this.dealPriceInWholePounts = dealPriceInWholePounts;
-            this.itemForDealPrice = itemForDealPrice;
+            this.applicableItemForDeal = applicableItemForDeal;
+            this.applicableItemQuantity = applicableItemQuantity;
         }
     }
 
