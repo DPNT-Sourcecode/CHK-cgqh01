@@ -76,7 +76,7 @@ public class Checkout {
 
     private static boolean dealAppliesTo(Deal deal, Item item, int itemCount, Map<Item, Long> originalItemCounts) {
         return deal.itemForDealPrice.equals(item) &&
-                itemCount > 0 &&
+                itemCount >= (item.equals(deal.criterionItem) ? deal.criterionItemQuantity : 1) &&
                 originalItemCounts.get(deal.criterionItem) >= deal.criterionItemQuantity;
     }
 
