@@ -20,14 +20,14 @@ public class Checkout {
             .stream()
             .collect(Collectors.toMap(i -> i.sku, i -> i));
 
-    private static final Deal threeAsFor130 = new Deal(A, 3, 130);
-    private static final Deal fiveAsFor200 = new Deal(A, 5, 200);
-    private static final Deal twoBFor45 = new Deal(B, 2, 45);
+    private static final Deal threeAsFor130 = new Deal(A, 3, 130, A);
+    private static final Deal fiveAsFor200 = new Deal(A, 5, 200, A);
+    private static final Deal twoBFor45 = new Deal(B, 2, 45, B);
 
     private static final List<Deal> deals = Arrays.asList(threeAsFor130, fiveAsFor200, twoBFor45);
 
     private static final Map<String, List<Deal>> dealsBySku = deals.stream()
-            .collect(Collectors.groupingBy(d -> d.item.sku));
+            .collect(Collectors.groupingBy(d -> d.criterionItem.sku));
 
     public static Integer checkout(String skus) {
         return Optional.ofNullable(skus)
@@ -50,8 +50,8 @@ public class Checkout {
                         int currentNumberOfItems = numberOfItems;
 
                         Map<Double, Deal> dealsByValue = deals.stream()
-                                .filter(deal -> deal.quantityToQualifyForDeal <= currentNumberOfItems)
-                                .collect(Collectors.toMap(d -> d.dealPriceInWholePounts * 1.0 / d.quantityToQualifyForDeal, d -> d));
+                                .filter(deal -> deal.criterionItemQuantity <= currentNumberOfItems)
+                                .collect(Collectors.toMap(d -> d.dealPriceInWholePounts * 1.0 / d.criterionItemQuantity, d -> d));
 
                         OptionalDouble maybeBestDealValue = dealsByValue.keySet()
                                 .stream()
@@ -61,7 +61,7 @@ public class Checkout {
                         if (maybeBestDealValue.isPresent()) {
                             Deal deal = dealsByValue.get(maybeBestDealValue.getAsDouble());
                             price = price + deal.dealPriceInWholePounts;
-                            numberOfItems = numberOfItems - deal.quantityToQualifyForDeal;
+                            numberOfItems = numberOfItems - deal.criterionItemQuantity;
                         } else {
                             price = price + item.priceInWholePounds * numberOfItems;
                             numberOfItems = 0;
@@ -75,7 +75,7 @@ public class Checkout {
     }
 
     private static boolean dealAppliesToItems(Deal deal, Map<Item, Long> itemsBySku) {
-        return itemsBySku.containsKey(deal.item) && itemsBySku.get(deal.item) >= deal.quantityToQualifyForDeal;
+        return itemsBySku.containsKey(deal.criterionItem) && itemsBySku.get(deal.criterionItem) >= deal.criterionItemQuantity;
     }
 
     private static class DealApplicationReport {
@@ -89,8 +89,8 @@ public class Checkout {
     }
 
     private static int getPriceUsingDeal(Item item, int numberOfItems, Deal dealToApply) {
-        int numberOfTimesDealIsMet = numberOfItems / dealToApply.quantityToQualifyForDeal;
-        int numberOfItemsNotInDeal = numberOfItems % dealToApply.quantityToQualifyForDeal;
+        int numberOfTimesDealIsMet = numberOfItems / dealToApply.criterionItemQuantity;
+        int numberOfItemsNotInDeal = numberOfItems % dealToApply.criterionItemQuantity;
         return numberOfTimesDealIsMet * dealToApply.dealPriceInWholePounts + numberOfItemsNotInDeal * item.priceInWholePounds;
     }
 
@@ -114,14 +114,16 @@ public class Checkout {
     }
 
     private static class Deal {
-        private final Item item;
-        private final int quantityToQualifyForDeal;
+        private final Item criterionItem;
+        private final int criterionItemQuantity;
         private final int dealPriceInWholePounts;
+        private final Item itemForDealPrice;
 
-        private Deal(Item item, int quantityToQualifyForDeal, int dealPriceInWholePounts) {
-            this.item = item;
-            this.quantityToQualifyForDeal = quantityToQualifyForDeal;
+        private Deal(Item criterionItem, int criterionItemQuantity, int dealPriceInWholePounts, Item itemForDealPrice) {
+            this.criterionItem = criterionItem;
+            this.criterionItemQuantity = criterionItemQuantity;
             this.dealPriceInWholePounts = dealPriceInWholePounts;
+            this.itemForDealPrice = itemForDealPrice;
         }
     }
 
