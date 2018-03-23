@@ -38,7 +38,13 @@ public class Checkout {
     private static int getPrice(List<Item> items) {
 
         Map<String, List<Item>> itemsBySku = items.stream().collect(Collectors.groupingBy(i -> i.sku));
-        List<Deal> applicableDeals = deals.stream().filter(deal -> dealAppliesToItems(deal, itemsBySku)).collect(Collectors.toList());
+
+        List<Deal> applicableDeals = deals.stream().filter(deal -> dealAppliesToItems(deal, itemsBySku))
+                .collect(Collectors.toList());
+
+        applicableDeals.stream()
+                .map(deal -> getDealReport(deal, itemsBySku))
+                .collect(Collectors.toList());
 
         Map<Item, Long> numberOfItemsPerSku = items.stream().collect(Collectors.groupingBy(i -> i, Collectors.counting()));
 
@@ -69,6 +75,11 @@ public class Checkout {
 
     }
 
+    private static DealApplicationReport getDealReport(Deal deal, Map<String, List<Item>> itemsBySku) {
+        String sku = deal.item.sku;
+        return null;
+    }
+
     private static boolean dealAppliesToItems(Deal deal, Map<String, List<Item>> itemsBySku) {
         String sku = deal.item.sku;
         return itemsBySku.containsKey(sku) && itemsBySku.get(sku).size() >= deal.quantityToQualifyForDeal;
@@ -76,11 +87,11 @@ public class Checkout {
 
     private static class DealApplicationReport {
         private final Map<String, List<Item>> itemsAfterDeal;
-        private final int dealRecuction;
+        private final int dealReduction;
 
-        private DealApplicationReport(Map<String, List<Item>> itemsAfterDeal, int dealRecuction) {
+        private DealApplicationReport(Map<String, List<Item>> itemsAfterDeal, int dealReduction) {
             this.itemsAfterDeal = itemsAfterDeal;
-            this.dealRecuction = dealRecuction;
+            this.dealReduction = dealReduction;
         }
     }
 
