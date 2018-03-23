@@ -130,6 +130,12 @@ public class CheckoutTest {
         assertEquals(80, price);
     }
 
+    @Test
+    public void testCase() {
+        int price = Checkout.checkout("CCADDEEBBA");
+        assertEquals(280, price);
+   }
+
 
     @Test
     public void four_E_gets_two_B_free() {
