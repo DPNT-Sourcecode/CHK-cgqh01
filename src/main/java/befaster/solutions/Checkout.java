@@ -27,9 +27,6 @@ public class Checkout {
 
     private static final List<Deal> deals = Arrays.asList(threeAsFor130, fiveAsFor200, twoBFor45, twoEGetsAFreeB);
 
-    private static final Map<String, List<Deal>> dealsBySku = deals.stream()
-            .collect(Collectors.groupingBy(d -> d.criterionItem.sku));
-
     public static Integer checkout(String skus) {
         return Optional.ofNullable(skus)
                 .flatMap(itemSkus -> convertToValidItems(itemSkus).map(Checkout::getPrice))
@@ -43,7 +40,6 @@ public class Checkout {
                 .stream()
                 .mapToInt(item -> {
                     int numberOfItems = originalItemCounts.get(item).intValue();
-                    List<Deal> deals = dealsBySku.getOrDefault(item.sku, Collections.emptyList());
 
                     int price = 0;
                     while (numberOfItems > 0) {
@@ -75,9 +71,11 @@ public class Checkout {
     }
 
     private static boolean dealAppliesTo(Deal deal, Item item, int itemCount, Map<Item, Long> originalItemCounts) {
-        return deal.itemForDealPrice.equals(item) &&
+        boolean result = deal.itemForDealPrice.equals(item) &&
                 itemCount >= (item.equals(deal.criterionItem) ? deal.criterionItemQuantity : 1) &&
+                originalItemCounts.containsKey(deal.criterionItem) &&
                 originalItemCounts.get(deal.criterionItem) >= deal.criterionItemQuantity;
+        return result;
     }
 
     private static Optional<List<Item>> convertToValidItems(String skus) {
