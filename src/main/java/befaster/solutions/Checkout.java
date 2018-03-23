@@ -1,9 +1,6 @@
 package befaster.solutions;
 
-import java.util.Arrays;
-import java.util.List;
-import java.util.Map;
-import java.util.Optional;
+import java.util.*;
 import java.util.stream.Collectors;
 
 public class Checkout {
@@ -46,6 +43,14 @@ public class Checkout {
                 .mapToInt(item -> {
                     int numberOfItems = numberOfItemsPerSku.get(item).intValue();
                     if (dealsBySku.containsKey(item.sku)) {
+
+                        deals.stream().sorted((o1, o2) -> {
+                            double o1PricePerUnit = o1.dealPriceInWholePounts * 1.0 / o1.dealPriceInWholePounts;
+                            double o2PricePerUnit = o2.dealPriceInWholePounts * 1.0 / o2.dealPriceInWholePounts;
+//                            return o1PricePerUnit - o2PricePerUnit;
+                            return 0;
+                        } );
+
                         List<Deal> deals = dealsBySku.get(item.sku);
                         return deals.stream()
                                 .mapToInt(deal -> getPriceUsingDeal(item, numberOfItems, deal))
