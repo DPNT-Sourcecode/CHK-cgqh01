@@ -37,14 +37,20 @@ public class Checkout {
 
     private static int getPrice(List<Item> items) {
 
-        Map<String, List<Item>> itemsBySku = items.stream().collect(Collectors.groupingBy(i -> i.sku));
+        Map<Item, Long> countsPerItem = items.stream().collect(Collectors.groupingBy(i -> i, Collectors.counting()));
 
-        List<Deal> applicableDeals = deals.stream().filter(deal -> dealAppliesToItems(deal, itemsBySku))
-                .collect(Collectors.toList());
+        while (System.currentTimeMillis() > 0) {
+            List<Deal> applicableDeals = deals.stream().filter(deal -> dealAppliesToItems(deal, countsPerItem))
+                    .collect(Collectors.toList());
 
-        applicableDeals.stream()
-                .map(deal -> getDealReport(deal, itemsBySku))
-                .collect(Collectors.toList());
+            List<DealApplicationReport> reports = applicableDeals.stream()
+                    .map(deal -> getDealReport(deal, countsPerItem))
+                    .sorted(Comparator.comparingInt(o -> o.dealReduction))
+                    .collect(Collectors.toList());
+            System.out.println();
+        }
+
+
 
         Map<Item, Long> numberOfItemsPerSku = items.stream().collect(Collectors.groupingBy(i -> i, Collectors.counting()));
 
@@ -75,21 +81,22 @@ public class Checkout {
 
     }
 
-    private static DealApplicationReport getDealReport(Deal deal, Map<String, List<Item>> itemsBySku) {
-        String sku = deal.item.sku;
-        return null;
+    private static DealApplicationReport getDealReport(Deal deal, Map<Item, Long> itemCounts) {
+        Map<Item, Long> updatedCounts = new HashMap<>(itemCounts);
+        long updatedCountForDealItem = updatedCounts.get(deal.item) - deal.quantityToQualifyForDeal;
+        updatedCounts.put(deal.item, updatedCountForDealItem);
+        return new DealApplicationReport(updatedCounts, deal.dealPriceInWholePounts);
     }
 
-    private static boolean dealAppliesToItems(Deal deal, Map<String, List<Item>> itemsBySku) {
-        String sku = deal.item.sku;
-        return itemsBySku.containsKey(sku) && itemsBySku.get(sku).size() >= deal.quantityToQualifyForDeal;
+    private static boolean dealAppliesToItems(Deal deal, Map<Item, Long> itemsBySku) {
+        return itemsBySku.containsKey(deal.item) && itemsBySku.get(deal.item) >= deal.quantityToQualifyForDeal;
     }
 
     private static class DealApplicationReport {
-        private final Map<String, List<Item>> itemsAfterDeal;
+        private final Map<Item, Long> itemsAfterDeal;
         private final int dealReduction;
 
-        private DealApplicationReport(Map<String, List<Item>> itemsAfterDeal, int dealReduction) {
+        private DealApplicationReport(Map<Item, Long> itemsAfterDeal, int dealReduction) {
             this.itemsAfterDeal = itemsAfterDeal;
             this.dealReduction = dealReduction;
         }
@@ -139,6 +146,24 @@ public class Checkout {
         private Item(String sku, int priceInWholePounds) {
             this.sku = sku;
             this.priceInWholePounds = priceInWholePounds;
+        }
+
+        @Override
+        public boolean equals(Object o) {
+            if (this == o) return true;
+            if (o == null || getClass() != o.getClass()) return false;
+
+            Item item = (Item) o;
+
+            if (priceInWholePounds != item.priceInWholePounds) return false;
+            return sku.equals(item.sku);
+        }
+
+        @Override
+        public int hashCode() {
+            int result = sku.hashCode();
+            result = 31 * result + priceInWholePounds;
+            return result;
         }
     }
 }
