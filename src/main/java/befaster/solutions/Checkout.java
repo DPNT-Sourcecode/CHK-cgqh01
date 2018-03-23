@@ -47,9 +47,10 @@ public class Checkout {
                     int numberOfItems = numberOfItemsPerSku.get(item).intValue();
                     if (dealsBySku.containsKey(item.sku)) {
                         List<Deal> deals = dealsBySku.get(item.sku);
-                        int numberOfTimesDealIsMet = numberOfItems / firstDealForSku.quantityToQualifyForDeal;
-                        int numberOfItemsNotInDeal = numberOfItems % firstDealForSku.quantityToQualifyForDeal;
-                        return numberOfTimesDealIsMet * firstDealForSku.dealPriceInWholePounts + numberOfItemsNotInDeal * item.priceInWholePounds;
+                        return deals.stream()
+                                .mapToInt(deal -> getPriceUsingDeal(item, numberOfItems, deal))
+                                .min().getAsInt();
+
                     } else {
                         return numberOfItems * item.priceInWholePounds;
                     }
@@ -57,6 +58,12 @@ public class Checkout {
                 })
                 .sum();
 
+    }
+
+    private static int getPriceUsingDeal(Item item, int numberOfItems, Deal dealToApply) {
+        int numberOfTimesDealIsMet = numberOfItems / dealToApply.quantityToQualifyForDeal;
+        int numberOfItemsNotInDeal = numberOfItems % dealToApply.quantityToQualifyForDeal;
+        return numberOfTimesDealIsMet * dealToApply.dealPriceInWholePounts + numberOfItemsNotInDeal * item.priceInWholePounds;
     }
 
     private static Optional<List<Item>> convertToValidItems(String skus) {

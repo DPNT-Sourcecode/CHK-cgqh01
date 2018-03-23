@@ -84,7 +84,7 @@ public class CheckoutTest {
     @Test
     public void deal_for_A_gets_applied_multiple_times() {
         int price = Checkout.checkout(serialize(Item.A, Item.A, Item.A, Item.A, Item.A, Item.A));
-        assertEquals(260, price);
+        assertEquals(250, price);
     }
 
     @Test
