@@ -69,6 +69,12 @@ public class CheckoutTest {
         assertEquals(INVALID, price);
     }
 
+    @Test
+    public void three_A_gets_special_price() {
+        int price = Checkout.checkout(serialize(Item.A, Item.A, Item.A));
+        assertEquals(130, price);
+    }
+
     private String serialize(Item... items) {
         return Arrays.stream(items)
                 .map(Enum::name)
