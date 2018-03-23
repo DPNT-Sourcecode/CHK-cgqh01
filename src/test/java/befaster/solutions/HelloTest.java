@@ -12,4 +12,10 @@ public class HelloTest {
         assertEquals("Hello Bella", bellaGreeting);
     }
 
+//    @Test
+//    public void say_hello_to_nobody() {
+//        String nobody = Hello.hello(null);
+//        assertEquals("Hello Bella", nobody);
+//    }
+
 }
