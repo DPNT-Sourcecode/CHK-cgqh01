@@ -45,7 +45,7 @@ public class Checkout {
 
             List<DealApplicationReport> reports = applicableDeals.stream()
                     .map(deal -> getDealReport(deal, countsPerItem))
-                    .sorted(Comparator.comparingInt(o -> o.dealReduction))
+                    .sorted(Comparator.comparingInt(o -> -1 * o.dealReduction))
                     .collect(Collectors.toList());
             System.out.println();
         }
