@@ -118,6 +118,12 @@ public class CheckoutTest {
         assertEquals(40, price);
     }
 
+    @Test
+    public void two_E_gets_a_free_B() {
+        int price = Checkout.checkout(serialize(Item.E, Item.E, Item.B));
+        assertEquals(80, price);
+    }
+
     private String serialize(Item... items) {
         return Arrays.stream(items)
                 .map(Enum::name)
