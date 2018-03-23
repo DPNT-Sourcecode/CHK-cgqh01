@@ -36,6 +36,10 @@ public class Checkout {
     }
 
     private static int getPrice(List<Item> items) {
+
+        Map<String, List<Item>> itemsBySku = items.stream().collect(Collectors.groupingBy(i -> i.sku));
+        List<Deal> applicableDeals = deals.stream().filter(deal -> dealAppliesToItems(deal, itemsBySku)).collect(Collectors.toList());
+
         Map<Item, Long> numberOfItemsPerSku = items.stream().collect(Collectors.groupingBy(i -> i, Collectors.counting()));
 
         return numberOfItemsPerSku.keySet()
@@ -63,6 +67,21 @@ public class Checkout {
                 })
                 .sum();
 
+    }
+
+    private static boolean dealAppliesToItems(Deal deal, Map<String, List<Item>> itemsBySku) {
+        String sku = deal.item.sku;
+        return itemsBySku.containsKey(sku) && itemsBySku.get(sku).size() >= deal.quantityToQualifyForDeal;
+    }
+
+    private static class DealApplicationReport {
+        private final Map<String, List<Item>> itemsAfterDeal;
+        private final int dealRecuction;
+
+        private DealApplicationReport(Map<String, List<Item>> itemsAfterDeal, int dealRecuction) {
+            this.itemsAfterDeal = itemsAfterDeal;
+            this.dealRecuction = dealRecuction;
+        }
     }
 
     private static int getPriceUsingDeal(Item item, int numberOfItems, Deal dealToApply) {
