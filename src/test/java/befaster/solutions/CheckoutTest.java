@@ -36,12 +36,19 @@ public class CheckoutTest {
         int price = Checkout.checkout(serialize(Item.D));
         assertEquals(15, price);
     }
-    
+
     @Test
     public void test_can_buy_multiple_A() {
         int price = Checkout.checkout(serialize(Item.A, Item.A));
         assertEquals(100, price);
     }
+
+    @Test
+    public void trims_whitespace_around_sku() {
+        int price = Checkout.checkout(" A , A ");
+        assertEquals(100, price);
+    }
+
     private String serialize(Item... items) {
         return Arrays.stream(items)
                 .map(Enum::name)

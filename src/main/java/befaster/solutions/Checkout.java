@@ -7,6 +7,8 @@ import java.util.stream.Collectors;
 
 public class Checkout {
 
+    private static final String DELIMITER = ",";
+
     private static final List<Item> items = Arrays.asList(
             new Item("A", 50),
             new Item("B", 30),
@@ -19,8 +21,9 @@ public class Checkout {
             .collect(Collectors.toMap(i -> i.sku, i -> i));
 
     public static Integer checkout(String skus) {
-        String firstSku = skus.split(",")[0];
-        return itemsBySku.get(firstSku).priceInWholePounds;
+        return Arrays.stream(skus.split(DELIMITER))
+                .mapToInt(sku -> itemsBySku.get(sku.trim()).priceInWholePounds)
+                .sum();
     }
 
     private static class Item {
