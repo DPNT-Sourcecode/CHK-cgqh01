@@ -24,9 +24,10 @@ public class Checkout {
             .collect(Collectors.toMap(i -> i.sku, i -> i));
 
     private static final Deal threeAsFor130 = new Deal(A, 3, 130);
+    private static final Deal fiveAsFor200 = new Deal(A, 5, 200);
     private static final Deal twoBFor45 = new Deal(B, 2, 45);
 
-    private static final List<Deal> deals = Arrays.asList(threeAsFor130, twoBFor45);
+    private static final List<Deal> deals = Arrays.asList(threeAsFor130, fiveAsFor200, twoBFor45);
 
     private static final Map<String, List<Deal>> dealsBySku = deals.stream()
             .collect(Collectors.groupingBy(d -> d.item.sku));
@@ -45,7 +46,7 @@ public class Checkout {
                 .mapToInt(item -> {
                     int numberOfItems = numberOfItemsPerSku.get(item).intValue();
                     if (dealsBySku.containsKey(item.sku)) {
-                        Deal firstDealForSku = dealsBySku.get(item.sku).get(0);
+                        List<Deal> deals = dealsBySku.get(item.sku);
                         int numberOfTimesDealIsMet = numberOfItems / firstDealForSku.quantityToQualifyForDeal;
                         int numberOfItemsNotInDeal = numberOfItems % firstDealForSku.quantityToQualifyForDeal;
                         return numberOfTimesDealIsMet * firstDealForSku.dealPriceInWholePounts + numberOfItemsNotInDeal * item.priceInWholePounds;

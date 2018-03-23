@@ -76,6 +76,12 @@ public class CheckoutTest {
     }
 
     @Test
+    public void five_A_gets_special_price() {
+        int price = Checkout.checkout(serialize(Item.A, Item.A, Item.A, Item.A, Item.A));
+        assertEquals(200, price);
+    }
+
+    @Test
     public void deal_for_A_gets_applied_multiple_times() {
         int price = Checkout.checkout(serialize(Item.A, Item.A, Item.A, Item.A, Item.A, Item.A));
         assertEquals(260, price);
