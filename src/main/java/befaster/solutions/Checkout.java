@@ -24,10 +24,28 @@ public class Checkout {
 
     public static Integer checkout(String skus) {
         return Optional.ofNullable(skus)
-                .map(itemSkus -> Arrays.stream(itemSkus.split(DELIMITER))
-                .mapToInt(sku -> itemsBySku.get(sku.trim()).priceInWholePounds)
-                .sum())
+                .flatMap(itemSkus -> convertToValidItems(itemSkus)
+                        .map(items -> items.stream().mapToInt(i -> i.priceInWholePounds).sum()))
                 .orElse(INVALID);
+    }
+
+    private static Optional<List<Item>> convertToValidItems(String skus) {
+        return Optional.ofNullable(skus)
+                .flatMap(delimitedSkus -> {
+
+                    List<String> parsedSkus = Arrays.stream(delimitedSkus.split(DELIMITER))
+                            .map(String::trim)
+                            .collect(Collectors.toList());
+
+                    boolean allSkusAreValid = parsedSkus.stream().allMatch(itemsBySku::containsKey);
+
+                    if (allSkusAreValid) {
+                        List<Item> items = parsedSkus.stream().map(itemsBySku::get).collect(Collectors.toList());
+                        return Optional.of(items);
+                    }
+                    return Optional.empty();
+                });
+
     }
 
     private static class Item {
