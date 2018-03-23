@@ -83,8 +83,21 @@ public class CheckoutTest {
 
     @Test
     public void deal_for_A_gets_applied_multiple_times() {
-        int price = Checkout.checkout(serialize(Item.A, Item.A, Item.A, Item.A, Item.A, Item.A));
-        assertEquals(250, price);
+        int price = Checkout.checkout(serialize(
+                Item.A, Item.A, Item.A, Item.A, Item.A,
+                Item.A, Item.A, Item.A, Item.A, Item.A,
+                Item.A, Item.A, Item.A, Item.A, Item.A
+        ));
+        assertEquals(200 * 3, price);
+    }
+
+    @Test
+    public void can_apply_to_deals_to_basket() {
+        int price = Checkout.checkout(serialize(
+                Item.A, Item.A, Item.A, Item.A, Item.A, // 5 for 200
+                Item.A, Item.A, Item.A // 3 for 130
+        ));
+        assertEquals(200 + 130, price);
     }
 
     @Test

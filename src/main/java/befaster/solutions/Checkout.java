@@ -49,7 +49,7 @@ public class Checkout {
                         List<Deal> deals = dealsBySku.get(item.sku);
                         return deals.stream()
                                 .mapToInt(deal -> getPriceUsingDeal(item, numberOfItems, deal))
-                                .min().getAsInt();
+                                .min().orElse(0);
 
                     } else {
                         return numberOfItems * item.priceInWholePounds;
