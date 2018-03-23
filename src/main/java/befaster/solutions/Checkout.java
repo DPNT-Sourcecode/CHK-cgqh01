@@ -39,14 +39,14 @@ public class Checkout {
         return originalItemCounts.keySet()
                 .stream()
                 .mapToInt(item -> {
-                    int numberOfItems = originalItemCounts.get(item).intValue();
+                    Map<Item, Long> itemCounts = new HashMap<>(originalItemCounts);
 
                     int price = 0;
-                    while (numberOfItems > 0) {
-                        int currentNumberOfItems = numberOfItems;
+                    while (itemCounts.get(item) > 0) {
+                        int currentNumberOfItems = itemCounts.get(item).intValue();
 
                         Map<Double, Deal> dealsByValue = deals.stream()
-                                .filter(deal -> dealAppliesTo(deal, item, currentNumberOfItems, originalItemCounts))
+                                .filter(deal -> dealAppliesTo(deal, item, currentNumberOfItems, itemCounts))
                                 .collect(Collectors.toMap(d -> d.dealPriceInWholePounts * 1.0 / d.criterionItemQuantity, d -> d));
 
                         OptionalDouble maybeBestDealValue = dealsByValue.keySet()
@@ -57,10 +57,11 @@ public class Checkout {
                         if (maybeBestDealValue.isPresent()) {
                             Deal deal = dealsByValue.get(maybeBestDealValue.getAsDouble());
                             price = price + deal.dealPriceInWholePounts;
-                            numberOfItems = numberOfItems - deal.criterionItemQuantity;
+                            long criterionItemsLeft = itemCounts.get(deal.criterionItem) - deal.criterionItemQuantity;
+                            itemCounts.put(deal.criterionItem, criterionItemsLeft);
                         } else {
-                            price = price + item.priceInWholePounds * numberOfItems;
-                            numberOfItems = 0;
+                            price = price + item.priceInWholePounds * currentNumberOfItems;
+                            itemCounts.put(item, 0L);
                         }
 
                     }
