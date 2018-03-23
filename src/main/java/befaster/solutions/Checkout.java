@@ -36,11 +36,25 @@ public class Checkout {
     }
 
     private static int getPrice(List<Item> items) {
-        Map<String, List<Item>> itemsBySku = items.stream().collect(Collectors.groupingBy(i -> i.sku));
-        itemsBySku.entrySet()
+        Map<Item, Long> numberOfItemsPerSku = items.stream().collect(Collectors.groupingBy(i -> i, Collectors.counting()));
+
+        return numberOfItemsPerSku.keySet()
                 .stream()
-                .map((sku, itemsForSku) -> )
-        return items.stream().mapToInt(i -> i.priceInWholePounds).sum();
+                .mapToInt(item -> {
+                    int numberOfItems = numberOfItemsPerSku.get(item).intValue();
+                    if (dealsBySku.containsKey(item.sku)) {
+                        Deal firstDealForSku = dealsBySku.get(item.sku).get(0);
+                        int numberOfTimesDealIsMet = numberOfItems / firstDealForSku.quantityToQualifyForDeal;
+                        int numberOfItemsNotInDeal = numberOfItems % firstDealForSku.quantityToQualifyForDeal;
+                        return numberOfTimesDealIsMet * firstDealForSku.dealPriceInWholePounts + numberOfItemsNotInDeal * item.priceInWholePounds;
+                    }
+                    else {
+                        return numberOfItems * item.priceInWholePounds;
+                    }
+
+                })
+                .sum();
+
     }
 
     private static Optional<List<Item>> convertToValidItems(String skus) {

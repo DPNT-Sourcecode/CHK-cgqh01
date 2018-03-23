@@ -75,6 +75,18 @@ public class CheckoutTest {
         assertEquals(130, price);
     }
 
+    @Test
+    public void deal_for_A_gets_applied_multiple_times() {
+        int price = Checkout.checkout(serialize(Item.A, Item.A, Item.A, Item.A, Item.A, Item.A));
+        assertEquals(260, price);
+    }
+
+    @Test
+    public void deal_for_A_gets_applied_but_also_undealified_a() {
+        int price = Checkout.checkout(serialize(Item.A, Item.A, Item.A, Item.A));
+        assertEquals(130 + 50, price);
+    }
+
     private String serialize(Item... items) {
         return Arrays.stream(items)
                 .map(Enum::name)
