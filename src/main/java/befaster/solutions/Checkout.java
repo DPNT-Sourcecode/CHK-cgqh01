@@ -8,7 +8,7 @@ import java.util.stream.Collectors;
 
 public class Checkout {
 
-    private static final String DELIMITER = ",";
+    private static final String DELIMITER = "";
     private static final int INVALID = -1;
 
     private static final Item A = new Item("A", 50);
@@ -63,7 +63,6 @@ public class Checkout {
                 .flatMap(delimitedSkus -> {
 
                     List<String> parsedSkus = Arrays.stream(delimitedSkus.split(DELIMITER))
-                            .map(String::trim)
                             .collect(Collectors.toList());
 
                     boolean allSkusAreValid = parsedSkus.stream().allMatch(itemsBySku::containsKey);

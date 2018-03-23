@@ -46,9 +46,9 @@ public class CheckoutTest {
     }
 
     @Test
-    public void trims_whitespace_around_sku() {
-        int price = Checkout.checkout(" A , A ");
-        assertEquals(100, price);
+    public void empty_basket_doesnt_cost_anything() {
+        int price = Checkout.checkout(serialize());
+        assertEquals(0, price);
     }
 
     @Test
@@ -97,7 +97,7 @@ public class CheckoutTest {
     private String serialize(Item... items) {
         return Arrays.stream(items)
                 .map(Enum::name)
-                .collect(Collectors.joining(","));
+                .collect(Collectors.joining(""));
     }
 
 }
