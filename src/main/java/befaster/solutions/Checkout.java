@@ -23,8 +23,9 @@ public class Checkout {
             .collect(Collectors.toMap(i -> i.sku, i -> i));
 
     private static final Deal threeAsFor130 = new Deal(A, 3, 130);
+    private static final Deal twoBFor45 = new Deal(B, 2, 45);
 
-    private static final List<Deal> deals = Arrays.asList(threeAsFor130);
+    private static final List<Deal> deals = Arrays.asList(threeAsFor130, twoBFor45);
 
     private static final Map<String, List<Deal>> dealsBySku = deals.stream()
             .collect(Collectors.groupingBy(d -> d.item.sku));
