@@ -124,6 +124,19 @@ public class CheckoutTest {
         assertEquals(80, price);
     }
 
+    @Test
+    public void two_E_but_there_is_no_b_to_get_free() {
+        int price = Checkout.checkout(serialize(Item.E, Item.E));
+        assertEquals(80, price);
+    }
+
+
+    @Test
+    public void four_E_gets_two_B_free() {
+        int price = Checkout.checkout(serialize(Item.E, Item.E, Item.E, Item.E, Item.B, Item.B));
+        assertEquals(40 * 4, price);
+    }
+
     private String serialize(Item... items) {
         return Arrays.stream(items)
                 .map(Enum::name)
