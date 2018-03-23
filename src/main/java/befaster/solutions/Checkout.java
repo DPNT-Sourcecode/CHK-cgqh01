@@ -27,7 +27,8 @@ public class Checkout {
     private static final Deal twoEGetsAFreeB = new Deal(E, 2, B, 0, 1);
     private static final Deal twoFGetOneFree = new Deal(F, 2, F, 0, 1);
 
-    private static final List<Deal> deals = Arrays.asList(threeAsFor130, fiveAsFor200, twoBFor45, twoEGetsAFreeB, twoFGetOneFree);
+    private static final List<Deal> deals = Arrays.asList(twoFGetOneFree);
+//    private static final List<Deal> deals = Arrays.asList(threeAsFor130, fiveAsFor200, twoBFor45, twoEGetsAFreeB, twoFGetOneFree);
 
     public static Integer checkout(String skus) {
         return Optional.ofNullable(skus)
@@ -62,7 +63,7 @@ public class Checkout {
                             long criterionItemsLeft = itemCounts.get(deal.criterionItem) - deal.criterionItemQuantity;
                             itemCounts.put(deal.criterionItem, criterionItemsLeft);
                             if (deal.criterionItem != item) {
-                                itemCounts.put(item, itemCounts.get(item) - 1);
+                                itemCounts.put(item, itemCounts.get(item) - deal.applicableItemQuantity);
                             }
                         } else {
                             price = price + item.priceInWholePounds * currentNumberOfItems;
@@ -78,7 +79,7 @@ public class Checkout {
 
     private static boolean dealAppliesTo(Deal deal, Item item, int itemCount, Map<Item, Long> originalItemCounts) {
         return deal.applicableItemForDeal.equals(item) &&
-                itemCount >= (item.equals(deal.criterionItem) ? deal.criterionItemQuantity : 1) &&
+                itemCount >= (item.equals(deal.criterionItem) ? deal.criterionItemQuantity + deal.applicableItemQuantity : deal.applicableItemQuantity) &&
                 originalItemCounts.containsKey(deal.criterionItem) &&
                 originalItemCounts.get(deal.criterionItem) >= deal.criterionItemQuantity;
     }
