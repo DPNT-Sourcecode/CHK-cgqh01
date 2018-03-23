@@ -12,37 +12,44 @@ public class CheckoutTest {
     private static final int INVALID = -1;
 
     enum Item {
-        A, B, C, D, E, Z
+        A, B, C, D, E, F, Z
     }
+
+    private static final int aPrice = 50;
+    private static final int bPrice = 30;
+    private static final int cPrice = 20;
+    private static final int dPrice = 15;
+    private static final int ePrice = 40;
+    private static final int fPrice = 10;
 
     @Test
     public void test_can_buy_a_single_A() {
         int price = Checkout.checkout(serialize(Item.A));
-        assertEquals(50, price);
+        assertEquals(aPrice, price);
     }
 
     @Test
     public void test_can_buy_a_single_C() {
         int price = Checkout.checkout(serialize(Item.C));
-        assertEquals(20, price);
+        assertEquals(cPrice, price);
     }
 
     @Test
     public void test_can_buy_a_single_B() {
         int price = Checkout.checkout(serialize(Item.B));
-        assertEquals(30, price);
+        assertEquals(bPrice, price);
     }
 
     @Test
     public void test_can_buy_a_single_D() {
         int price = Checkout.checkout(serialize(Item.D));
-        assertEquals(15, price);
+        assertEquals(dPrice, price);
     }
 
     @Test
     public void test_can_buy_multiple_A() {
         int price = Checkout.checkout(serialize(Item.A, Item.A));
-        assertEquals(100, price);
+        assertEquals(aPrice * 2, price);
     }
 
     @Test
@@ -127,19 +134,25 @@ public class CheckoutTest {
     @Test
     public void two_E_but_there_is_no_b_to_get_free() {
         int price = Checkout.checkout(serialize(Item.E, Item.E));
-        assertEquals(80, price);
+        assertEquals(ePrice * 2, price);
     }
 
     @Test
     public void two_E_and_two_B_only_get_one_B_free() {
         int price = Checkout.checkout(serialize(Item.E, Item.E, Item.B, Item.B));
-        assertEquals(40 * 2 + 30, price);
+        assertEquals(ePrice * 2 + bPrice, price);
     }
 
     @Test
     public void four_E_gets_two_B_free() {
         int price = Checkout.checkout(serialize(Item.E, Item.E, Item.E, Item.E, Item.B, Item.B));
-        assertEquals(40 * 4, price);
+        assertEquals(ePrice * 4, price);
+    }
+
+    @Test
+    public void can_buy_one_F() {
+        int price = Checkout.checkout(serialize(Item.F));
+        assertEquals(fPrice, price);
     }
 
     @Test
