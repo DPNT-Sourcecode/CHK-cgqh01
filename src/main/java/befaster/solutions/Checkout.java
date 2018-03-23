@@ -59,6 +59,9 @@ public class Checkout {
                             price = price + deal.dealPriceInWholePounts;
                             long criterionItemsLeft = itemCounts.get(deal.criterionItem) - deal.criterionItemQuantity;
                             itemCounts.put(deal.criterionItem, criterionItemsLeft);
+                            if (deal.criterionItem != item) {
+                                itemCounts.put(item, itemCounts.get(item) - 1);
+                            }
                         } else {
                             price = price + item.priceInWholePounds * currentNumberOfItems;
                             itemCounts.put(item, 0L);
@@ -72,11 +75,10 @@ public class Checkout {
     }
 
     private static boolean dealAppliesTo(Deal deal, Item item, int itemCount, Map<Item, Long> originalItemCounts) {
-        boolean result = deal.itemForDealPrice.equals(item) &&
+        return deal.itemForDealPrice.equals(item) &&
                 itemCount >= (item.equals(deal.criterionItem) ? deal.criterionItemQuantity : 1) &&
                 originalItemCounts.containsKey(deal.criterionItem) &&
                 originalItemCounts.get(deal.criterionItem) >= deal.criterionItemQuantity;
-        return result;
     }
 
     private static Optional<List<Item>> convertToValidItems(String skus) {

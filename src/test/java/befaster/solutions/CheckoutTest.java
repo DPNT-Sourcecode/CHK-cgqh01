@@ -142,6 +142,13 @@ public class CheckoutTest {
         assertEquals(40 * 4, price);
     }
 
+    @Test
+    public void userAcceptanceTests() {
+        assertEquals(280, Checkout.checkout("CCADDEEBBA").intValue());
+        assertEquals(280, Checkout.checkout("ABCDEABCDE").intValue());
+        assertEquals(455, Checkout.checkout("AAAAAEEBAAABB").intValue());
+    }
+
     private String serialize(Item... items) {
         return Arrays.stream(items)
                 .map(Enum::name)
